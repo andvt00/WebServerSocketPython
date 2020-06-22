@@ -6,6 +6,7 @@ s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 s.bind(address)
 s.listen(1)
 print('Serving on localhost:'+str(address[1]))
+check = False
 while True:
    connection,address = s.accept()
    request = connection.recv(1024).decode('utf-8')
@@ -19,8 +20,9 @@ while True:
             name_file = string_list[1][1:]
          if string_list[1] == '/files.html':
             name_file = string_list[1][1:]
-         if string_list[1] == '/info.html':
+         if string_list[1] == '/info.html' and check:
             name_file = string_list[1][1:]
+            check = False
          print(name_file)
          file = open(name_file,'rb')
          response = file.read()
