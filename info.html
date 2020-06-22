@@ -1,1 +1,202 @@
-abcde
+<!DOCTYPE html>
+<html class="" lang="en" style="">
+<head lang="en">
+    <meta charset="utf-8"/>
+    <title>Members Information</title>
+<style>
+.abcdef {
+    display: block;
+    text-align: center;
+    width: 100%;
+    font-family: "Lato", sans-serif;
+    border: none;
+    padding: 0 0 0 30px;
+    background-color: #2d2d2d;
+    color: #f6faf1;
+    margin-top: -1px;
+}
+.container {
+    margin-right: auto;
+    margin-left: auto;
+    padding-left: 15px;
+    padding-right: 15px;
+    max-width: 100%;
+    border-radius: 6px;
+}
+@media (min-width: 768px) {
+    .container {
+        width: 750px;
+    }
+}
+@media (min-width: 992px) {
+    .container {
+        width: 970px;
+    }
+}
+@media (min-width: 1200px) {
+    .container {
+        width: 1210px;
+    }
+}
+.container:before,
+.container:after,
+.container-fluid:before,
+.container-fluid:after {
+    content: " ";
+    display: table;
+}
+.container:after,
+.container-fluid:after {
+    clear: both;
+}
+.container .jumbotron,
+.container-fluid .jumbotron {
+    border-radius: 6px;
+}
+.jumbotron .container {
+    max-width: 100%;
+}
+@media screen and (min-width: 768px) {
+    .jumbotron {
+        padding: 48px 0;
+    }
+    .container .jumbotron,
+    .container-fluid .jumbotron {
+        padding-left: 60px;
+        padding-right: 60px;
+    }
+    .jumbotron h1,
+    .jumbotron .h1 {
+        font-size: 63px;
+    }
+}
+.Members{
+    text-align: left;
+}
+body {
+    background-color: lightblue;
+}
+.displayTableVertical {
+    display: block;
+    display: table;
+    width: 100%;
+    height: 100%;
+    vertical-align: middle;
+}
+.displayTableCell{
+    vertical-align: middle;
+    display: block;
+    vertical-align: bottom;
+    ertical-align: right;
+    width: 100px;
+    padding-right: 10px;
+}
+.displayTableCell-right {
+    text-align: left;
+    width: auto;
+    vertical-align: top;
+    display: table-cell;
+    padding-left: 130px;
+}
+.image {
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    border-radius: 50%;
+    overflow: hidden;
+    display: inline-block;
+    height: 200px;
+    width: 200px;
+}
+.general {
+    font-size: 25px;
+    margin-bottom: 20px;
+    font-family: 'Lobster', cursive;
+    padding-top: 20px;
+}
+.name {
+    padding-top: 50px;
+    font-size: 25px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+/*.role {
+    font-style: italic;
+    font-weight: 600;
+}*/
+.description {
+    padding: 10px 22px 25px 22px;
+    line-height: 25px;
+    font-family: "Lato", sans-serif;
+    padding: 25px 23px;
+}
+.ct-fw-300 {
+    font-weight: 300;
+}
+</style>
+</head>
+<body class="">
+    <section class = "Members">
+        <div class="">
+        <h3><br>Members<br><br></h3>
+    </section>
+
+    <section class="">
+        <div class="abcdef">
+            <div class="container">
+                <div class="displayTableVertical">
+                    <div class="displayTableCell">
+                        <div class="image">
+                            <img src="avatar.jpg" alt="person">
+                        </div>
+                    </div>
+                    <div class="displayTableCell-right">
+                        <div class="general">
+                                <span class="name">
+                                    Đoàn Văn Thanh An - 18120109
+                                </span>
+                                <!-- <span class="role">
+                                    Student
+                                </span> -->
+                        </div>
+                        <div class="description">
+                            <p class="ct-fw-300">
+                                I'm a student at University of Science<br>
+                                Favorites: Coding, Carrying team
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <br><br><br>
+    <section class="">
+        <div class="abcdef">
+            <div class="container">
+                <div class="displayTableVertical">
+                    <div class="displayTableCell">
+                        <div class="image">
+                            <img src="avatar2.jpg" alt="person">
+                        </div>
+                    </div>
+                    <div class="displayTableCell-right">
+                        <div class="general">
+                                <span class="name">
+                                    Nguyễn Đại Dương - 18120168
+                                </span>
+                                <!-- <span class="role">
+                                    Student
+                                </span> -->
+                        </div>
+                        <div class="description">
+                            <p class="ct-fw-300">
+                                I'm a student at University of Science<br>
+                                Favorites: Sleep, Play Games 
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+<!-- end switcher -->
