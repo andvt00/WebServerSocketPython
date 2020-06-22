@@ -1,2 +1,2 @@
 # WebServerSocketPython
-Creat Web Server use socket python
+Create Web Server use socket python
