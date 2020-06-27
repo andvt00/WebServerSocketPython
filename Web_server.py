@@ -9,39 +9,15 @@ HOST = '0.0.0.0'
 PORT = 8080
 sr = 'ServerRoot'
 accessInfo = False
-def response_ok(body=b"This is a minimal response", mimetype=b"text/plain", length=0):
-    """
-    returns a basic HTTP response
-    Ex:
-        response_ok(
-            b"<html><h1>Welcome:</h1></html>",
-            b"text/html"
-        ) ->
-        b'''
-        HTTP/1.1 200 OK\r\n
-        Content-Type: text/html\r\n
-        \r\n
-        <html><h1>Welcome:</h1></html>\r\n
-        '''
-    """
-
+def response_ok(body=b"This is a minimal response", mimetype=b"text/plain", length=0, name='Noname'):
     return b"\r\n".join([
         b"HTTP/1.1 200 OK",
         b"accept-ranges: bytes",
-        b"Content-Disposition: inline; filename=picture.png",
+        b"Content-Disposition: inline; filename=" + name.encode('utf-8'),
         b"content-length: " + str(length).encode('utf-8'),
         b"Content-Type: " + mimetype,
         b"",
         body,
-    ])
-
-def response_not_found():
-    """Returns a 404 Not Found response"""
-
-    return b"\r\n".join([
-        b"HTTP/1.1 404 Not Found",
-        b"",
-        b"The server can not find the requested URL",
     ])
 
 def convert_size(size_bytes):
@@ -55,56 +31,60 @@ def convert_size(size_bytes):
 
 def directory_files(path_directory):
     files = os.listdir(path_directory)
+    if (path_directory == 'ServerRoot/files/'):
+      parent_directory = 'ServerRoot/files/'
+    else :
+      val = path_directory.rsplit('/', 2)
+      for v in val:
+        print(v + '/n')
+      parent_directory =''
     result = '<html><head><meta charset="utf-8"/><title>' + path_directory + '</title></head><body><h2>' + path_directory +'</h2><table><tbody><tr><th valign="top"></th>'
-    result += '<th><a href="' + path_directory + '?C=N;O=D">Name</a></th>'
-    result += '<th><a href="' + path_directory + '?C=M;O=A">Last modified</a></th>'
-    result += '<th><a href="' + path_directory + '?C=S;O=A">Size</a></th>'
-    result += '<th><a href="' + path_directory + '?C=D;O=A">Description</a></th></tr>'
-    result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="./ServerRoot/back.gif" alt="[PARENTDIR]"></td>'
+    result += '<th><a href="' + path_directory + '">Name</a></th>'
+    result += '<th><a href="' + path_directory + '">Last modified</a></th>'
+    result += '<th><a href="' + path_directory + '">Size</a></th>'
+    result += '<th><a href="' + path_directory + '">Description</a></th></tr>'
+    result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="back.gif" alt="[PARENTDIR]"></td>'
     result += '<td><a href="' + path_directory + '">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
     for f in files:
       path_file = path_directory + f
+      print(path_file)
       times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(path_file)))
       sizes = convert_size(os.path.getsize(path_file))
-      result += '<tr><td valign="top"><img src="./ServerRoot/compressed.gif" alt="[   ]"></td><td><a href="' + path_file + '">' + f + '</a>  </td><td align="right">'
+      result += '<tr><td valign="top"><img src="compressed.gif" alt="[   ]"></td><td><a href="' + path_file + '">' + f + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
     result += '<tr><th colspan="5"><hr></th></tr></tbody></table><iframe id="nr-ext-rsicon" style="position: absolute; display: none; width: 50px; height: 50px; z-index: 2147483647; border-style: none; background: transparent"></iframe></form></body></html>'
     return result
 
 def download_file(path_file):
-  path_file = '.' + path_file
-  print('Path:' + path_file)
-  # if file requested is a directory list the files in the directory
-  # and append a '/' to any files listed that are directories
-  if os.path.isdir(os.path.join(path_file)):
-    content = directory_files(path_file + '/')
+  # path_file = '.' + path_file
+  # print('Path:' + path_file)
+  # Check path is directory 
+  if os.path.isdir(path_file):
+    content = directory_files(path_file)
     mime_type = 'text/plain'
-    return content.encode('utf-8'), mime_type.encode('utf-8'), 0, 1
+    return content.encode('utf-8'), mime_type.encode('utf-8'), path_file, 0, 1
 
-  # if file requested is a file list the contents of the file
+  # Check path is file
   if os.path.isfile(path_file):
-    print('Hello')
-    print(mimetypes.guess_type(path_file)[0])
-    if "text" not in mimetypes.guess_type(path_file)[0]:  
-      #print('file_path = ', file_path)
-      print(path_file)
+    if "text" not in mimetypes.guess_type(path_file)[0]:
       with open(path_file, 'rb') as fd:
         content = fd.read()
-        fd.close()
-        #print(content)
+      fd.close()
       mime_type = mimetypes.guess_type(path_file)[0]
-      print(mime_type)
       length = os.path.getsize(path_file)
-      return str(content).encode('utf8'), mime_type.encode('utf8'), length, 0
+      val = path_file.split('/')
+      name_file = '' + val[-1]
+      return content, mime_type.encode('utf8'), name_file, length, 0
     else:
       with open(path_file, 'r') as fd:
         content = fd.readlines()
-      print("content = ", content)
+      fd.close()
       content1 = ' '.join(content)
       mime_type = mimetypes.guess_type(path_file)[0]
       length = os.path.getsize(path_file)
-      return content1.encode('utf8'), mime_type.encode('utf8'), length, 0
+      name_file = [val[-1] for val in path_file.split('/')]
+      return content1, mime_type.encode('utf8'), name_file, length, 0
     # If file can not be found
   else:
     raise NameError
@@ -150,13 +130,13 @@ def openSR(url, conn): #Send file on ServerRoot folder
 def ConnHandler(conn, addr):
     data = conn.recv(1024).decode('utf-8')
     print("Recieved Request:\n")
-    print(data)
+    #print(data)
     if not data:
         conn.close()
         return
     parsed_fields = {}
     parsed_fields = parse_header(data)
-    print(parsed_fields)
+    print(parsed_fields['Path'])
     req_file = ''
     global accessInfo
     if parsed_fields['Method'] == 'POST':
@@ -175,16 +155,16 @@ def ConnHandler(conn, addr):
                 reDirect('/404.html', conn)
             return
         elif parsed_fields['Path'] == '/files.html':
-          print('hello')
           sock = ("HTTP/1.1 200 OK\r\n\r\n").encode('utf-8')
           sock += directory_files(sr + '/files/').encode('utf-8')
           conn.sendall(sock)
           conn.close()
           return
         elif parsed_fields['Path'].find("/ServerRoot/files/") == 0:
+          print('a')
           path_file = (parsed_fields['Path'])
           try:
-            body, mimetype, leng, isdir = download_file(path_file)
+            body, mimetype, name_file, leng, isdir = download_file(path_file)
             print('Hi')
             # print("body ", body, file=sys.stderr)
           except NameError:
@@ -194,17 +174,12 @@ def ConnHandler(conn, addr):
             if isdir:
               sock = ("HTTP/1.1 200 OK\r\n\r\n").encode('utf-8')
               sock += body
-              conn.sendall(sock)
-              conn.close()
             else:
-              sock = response_ok(body=body, mimetype=mimetype, length=leng)
-              #print(sock)
-              # conn.sendall('HTTP/1.1 200 OK\r\n'.encode())
-              # conn.sendall(("Content-Type: image/jpeg\r\n").encode())
-              # conn.sendall("Accept-Ranges: bytes\r\n\r\n".encode())
-              # conn.sendall(body)
-              conn.sendall(sock)
-              conn.close()
+              print(name_file)
+              type(name_file)
+              sock = response_ok(body=body, mimetype=mimetype, length=leng, name=name_file)
+          conn.sendall(sock)
+          conn.close()
           return
         req_file = sr + parsed_fields['Path']
     if (os.path.isfile(req_file)):
