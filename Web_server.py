@@ -29,35 +29,37 @@ def convert_size(size_bytes):
    s = round(size_bytes / p, 1)
    return "%s%s" % (s, size_name[i])
 
-#Path_directory Ex: files/
+#Path_directory Ex: /files/
 def directory_files(path_directory):
+    name_directory = path_directory[1:]  # files/.../
     real_path_directory = sr + path_directory
     files = os.listdir(real_path_directory)
-    if (path_directory == '/files/'):
-      parent_directory = '/files.html'
+    if (name_directory == 'files/'):
+      parent_directory = 'files/'
     else :
-      val = path_directory.rsplit('/', 3)
-      parent_directory = val[0]
-    result = '<html><head><meta charset="utf-8"/><title>' + path_directory + '</title></head><body><h2>' + path_directory +'</h2><table><tbody><tr><th valign="top"></th>'
-    result += '<th><a href="' + path_directory + '">Name</a></th>'
-    result += '<th><a href="' + path_directory + '">Last modified</a></th>'
-    result += '<th><a href="' + path_directory + '">Size</a></th>'
-    result += '<th><a href="' + path_directory + '">Description</a></th></tr>'
+      val = name_directory.rsplit('/', 3)
+      parent_directory = '0' + val[0] + '/'  # file/
+    result = '<html><head><meta charset="utf-8"/><title>' + name_directory + '</title></head><body><h2>' + name_directory +'</h2><table><tbody><tr><th valign="top"></th>'
+    result += '<th><a href="' + name_directory + '">Name</a></th>'
+    result += '<th><a href="' + name_directory + '">Last modified</a></th>'
+    result += '<th><a href="' + name_directory + '">Size</a></th>'
+    result += '<th><a href="' + name_directory + '">Description</a></th></tr>'
     result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="back.gif" alt="[PARENTDIR]"></td>'
     result += '<td><a href="' + parent_directory + '">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
     for f in files:
-      path_file = path_directory + f
+      path_file = name_directory + f    # files/a.txt
       print(path_file)
-      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(sr + path_file)))
-      sizes = convert_size(os.path.getsize(sr + path_file))
+      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(sr + '/' + path_file)))
+      sizes = convert_size(os.path.getsize(sr + '/' + path_file))
       result += '<tr><td valign="top"><img src="compressed.gif" alt="[   ]"></td><td><a href="' + path_file + '">' + f + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
     result += '<tr><th colspan="5"><hr></th></tr></tbody></table><iframe id="nr-ext-rsicon" style="position: absolute; display: none; width: 50px; height: 50px; z-index: 2147483647; border-style: none; background: transparent"></iframe></form></body></html>'
     return result
 
-def download_file(path_file):
+def download_file(path_file): # path_file: /files/a.txt or /files/abc
   real_path_file = sr + path_file
+  name_path_file = path_file[1:]
   if os.path.isdir(real_path_file):
     content = directory_files(path_file + '/')
     mime_type = 'text/plain'
@@ -159,14 +161,19 @@ def ConnHandler(conn, addr):
           conn.sendall(sock)
           conn.close()
           return
-        elif parsed_fields['Path'].find("/files") == 0:
+        elif parsed_fields['Path'].find("/files") == 0: # Path: /files/a.txt ro /files/abc
           path_file = (parsed_fields['Path'])
-          body, mimetype, name_file, leng, isdir = download_file(path_file)
-          if isdir:
-            sock = ("HTTP/1.1 200 OK\r\n\r\n").encode('utf-8')
-            sock += body
-          else:
-            sock = response_ok(body=body, mimetype=mimetype, length=leng, name=name_file)
+          try:
+            body, mimetype, name_file, leng, isdir = download_file(path_file)
+          except NameError:
+            conn.close()
+            return
+          else: 
+            if isdir:
+              sock = ("HTTP/1.1 200 OK\r\n\r\n").encode('utf-8')
+              sock += body
+            else:
+              sock = response_ok(body=body, mimetype=mimetype, length=leng, name=name_file)
           conn.sendall(sock)
           conn.close()
           return
@@ -175,6 +182,7 @@ def ConnHandler(conn, addr):
         response_header = ("HTTP/1.1 200 OK\r\n\r\n")
     else:
         reDirect('/404.html',conn)
+        print('reDirect')
         return
     file_content = open(req_file,"rb")
     response_body = file_content.read()
