@@ -7,7 +7,7 @@ import sys
 import mimetypes
 from urllib.parse import unquote
 
-HOST = '127.0.109.168'
+HOST = 'localhost'
 PORT = 80
 sr = 'ServerRoot'
 accessInfo = False
@@ -36,63 +36,56 @@ def getDomain():
 #Path_directory Ex: /files/
 def directory_files(path_directory):
     name_directory = path_directory[1:]  # files/.../
-    real_path_directory = sr + path_directory
-    files = os.listdir(real_path_directory)
-    val = name_directory.rsplit('/')
-    print(val)
-    parent_directory='0.0.0.0:80/files'
+    files = os.listdir(name_directory)
+    parent_directory = name_directory[:name_directory.rfind('/')]
     result = '<html><head><meta charset="utf-8"/><title>' + name_directory + '</title></head><body><h2>' + name_directory +'</h2><table><tbody><tr><th valign="top"></th>'
     result += '<th><a href="' + name_directory + '">Name</a></th>'
     result += '<th><a href="' + name_directory + '">Last modified</a></th>'
     result += '<th><a href="' + name_directory + '">Size</a></th>'
     result += '<th><a href="' + name_directory + '">Description</a></th></tr>'
     result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="' + getDomain() + 'back.gif" alt="[PARENTDIR]"></td>'
-    result += '<td><a href="' + parent_directory + '"' + 'target=_top' + '>Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
+    result += '<td><a href="' + getDomain() + parent_directory + '"' + 'target=_top' + '>Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
     for f in files:
-      path_file = val[-2] + '/' + f    # files/a.txt
+      path_file = name_directory + '/' + f    # files/a.txt
       print(path_file)
-      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(real_path_directory + '/' + f)))
-      sizes = convert_size(os.path.getsize(real_path_directory + '/' + f))
-      result += '<tr><td valign="top"><img src="' + getDomain() + 'compressed.gif" alt="[   ]"></td><td><a href="' + path_file + '">' + f + '</a>  </td><td align="right">'
+      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(name_directory + '/' + f)))
+      sizes = convert_size(os.path.getsize(name_directory + '/' + f))
+      result += '<tr><td valign="top"><img src="' + getDomain() + 'compressed.gif" alt="[   ]"></td><td><a href="' + getDomain() + path_file + '">' + f + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
     result += '<tr><th colspan="5"><hr></th></tr></tbody></table><iframe id="nr-ext-rsicon" style="position: absolute; display: none; width: 50px; height: 50px; z-index: 2147483647; border-style: none; background: transparent"></iframe></form></body></html>'
     return result
 
 def download_file(path_file): # path_file: /files/a.txt or /files/abc
-  path_file = unquote(path_file)
-  print(path_file)
-  real_path_file = sr + path_file
-  name_path_file = path_file[1:]
-  if os.path.isdir(real_path_file):
-    content = directory_files(path_file + '/')
-    mime_type = 'text/plain'
-    return content.encode('utf-8'), mime_type.encode('utf-8'), path_file, 0, 1
-
-  # Check path is file
-  if os.path.isfile(real_path_file):
-    if "text" not in mimetypes.guess_type(real_path_file)[0]:
-      with open(real_path_file, 'rb') as fd:
-        content = fd.read()
-      fd.close()
-      mime_type = mimetypes.guess_type(real_path_file)[0]
-      length = os.path.getsize(real_path_file)
-      val = real_path_file.split('/')
-      name_file = '' + val[-1]
-      return content, mime_type.encode('utf8'), name_file.encode('utf-8'), length, 0
-    else:
-      with open(real_path_file, 'r') as fd:
-        content = fd.readlines()
-      fd.close()
-      content1 = ' '.join(content)
-      mime_type = mimetypes.guess_type(real_path_file)[0]
-      length = os.path.getsize(real_path_file)
-      val = real_path_file.split('/')
-      name_file = '' + val[-1]
-      return content1.encode('utf-8'), mime_type.encode('utf8'), name_file.encode('utf-8'), length, 0
+    path_file = unquote(path_file)[1:]
+    print(path_file)
+    if os.path.isdir(path_file):
+        content = directory_files('/' + path_file)
+        mime_type = 'text/plain'
+        return content.encode('utf-8'), mime_type.encode('utf-8'), path_file, 0, 1
+    if os.path.isfile(path_file):
+        if "text" not in mimetypes.guess_type(path_file)[0]:
+            with open(path_file, 'rb') as fd:
+                content = fd.read()
+            fd.close()
+            mime_type = mimetypes.guess_type(path_file)[0]
+            length = os.path.getsize(path_file)
+            val = path_file.split('/')
+            name_file = '' + val[-1]
+            return content, mime_type.encode('utf8'), name_file.encode('utf-8'), length, 0
+        else:
+            with open(path_file, 'r') as fd:
+                content = fd.readlines()
+            fd.close()
+            content1 = ' '.join(content)
+            mime_type = mimetypes.guess_type(path_file)[0]
+            length = os.path.getsize(path_file)
+            val = path_file.split('/')
+            name_file = '' + val[-1]
+            return content1.encode('utf-8'), mime_type.encode('utf8'), name_file.encode('utf-8'), length, 0
     # If file can not be found
-  else:
-    raise NameError
+    else:
+        raise NameError
 def parse_header(data):
     h_lines = data.split('\r\n')
     h_words = h_lines[0].split(' ')
@@ -160,7 +153,7 @@ def ConnHandler(conn, addr):
             return
         elif parsed_fields['Path'] == '/files.html':
           sock = ("HTTP/1.1 200 OK\r\n\r\n").encode('utf-8')
-          sock += directory_files('/files/').encode('utf-8')
+          sock += directory_files('/files').encode('utf-8')
           conn.sendall(sock)
           conn.close()
           return
