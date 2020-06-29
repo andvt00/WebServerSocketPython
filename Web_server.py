@@ -7,7 +7,7 @@ import sys
 import mimetypes
 from urllib.parse import unquote
 
-HOST = '0.0.0.0'
+HOST = '127.0.109.168'
 PORT = 80
 sr = 'ServerRoot'
 accessInfo = False
@@ -31,6 +31,8 @@ def convert_size(size_bytes):
    s = round(size_bytes / p, 1)
    return "%s%s" % (s, size_name[i])
 
+def getDomain():
+    return 'http://'+HOST+':'+str(PORT)+'/'
 #Path_directory Ex: /files/
 def directory_files(path_directory):
     name_directory = path_directory[1:]  # files/.../
@@ -38,20 +40,20 @@ def directory_files(path_directory):
     files = os.listdir(real_path_directory)
     val = name_directory.rsplit('/')
     print(val)
-    parent_directory = val[-1] + '/'  # file/
+    parent_directory='0.0.0.0:80/files'
     result = '<html><head><meta charset="utf-8"/><title>' + name_directory + '</title></head><body><h2>' + name_directory +'</h2><table><tbody><tr><th valign="top"></th>'
     result += '<th><a href="' + name_directory + '">Name</a></th>'
     result += '<th><a href="' + name_directory + '">Last modified</a></th>'
     result += '<th><a href="' + name_directory + '">Size</a></th>'
     result += '<th><a href="' + name_directory + '">Description</a></th></tr>'
-    result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="back.gif" alt="[PARENTDIR]"></td>'
-    result += '<td><a href="' + parent_directory + '">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
+    result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="' + getDomain() + 'back.gif" alt="[PARENTDIR]"></td>'
+    result += '<td><a href="' + parent_directory + '"' + 'target=_top' + '>Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
     for f in files:
       path_file = val[-2] + '/' + f    # files/a.txt
       print(path_file)
       times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(real_path_directory + '/' + f)))
       sizes = convert_size(os.path.getsize(real_path_directory + '/' + f))
-      result += '<tr><td valign="top"><img src="compressed.gif" alt="[   ]"></td><td><a href="' + path_file + '">' + f + '</a>  </td><td align="right">'
+      result += '<tr><td valign="top"><img src="' + getDomain() + 'compressed.gif" alt="[   ]"></td><td><a href="' + path_file + '">' + f + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
     result += '<tr><th colspan="5"><hr></th></tr></tbody></table><iframe id="nr-ext-rsicon" style="position: absolute; display: none; width: 50px; height: 50px; z-index: 2147483647; border-style: none; background: transparent"></iframe></form></body></html>'
