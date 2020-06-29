@@ -5,6 +5,8 @@ import time
 import math
 import sys
 import mimetypes
+from urllib.parse import unquote
+
 HOST = '127.0.109.168'
 PORT = 8080
 sr = 'ServerRoot'
@@ -58,6 +60,8 @@ def directory_files(path_directory):
     return result
 
 def download_file(path_file): # path_file: /files/a.txt or /files/abc
+  path_file = unquote(path_file)
+  print(path_file)
   real_path_file = sr + path_file
   name_path_file = path_file[1:]
   if os.path.isdir(real_path_file):
