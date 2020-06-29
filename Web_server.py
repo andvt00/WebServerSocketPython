@@ -8,7 +8,7 @@ import mimetypes
 from urllib.parse import unquote
 
 HOST = 'localhost'
-PORT = 80
+PORT = 8080
 sr = 'ServerRoot'
 accessInfo = False
 def response_ok(body=b"This is a minimal response", mimetype=b"text/plain", length=0, name='Noname'):
@@ -36,21 +36,42 @@ def getDomain():
 #Path_directory Ex: /files/
 def directory_files(path_directory):
     name_directory = path_directory[1:]  # files/.../
+    # Bien sort
+    sortable, next_sort = False, 'O=D'
+    if "Sort=1" in path_directory:
+        sortable = True
+        name_directory = path_directory[1:-16]
     files = os.listdir(name_directory)
+    # Create list of tuple to sort
+    f_val = [(f, os.path.getmtime(name_directory+'/' + f), os.path.getsize(name_directory + '/'+f), f) for f in files]
+    print(f_val)
     parent_directory = name_directory[:name_directory.rfind('/')]
+    if sortable:
+        require = path_directory[(len(path_directory)-7):].split(';') # C=*;O=*
+        print(require)
+        type_sort, trend_sort = require[0], require[1]
+        if trend_sort == next_sort:
+            next_sort = 'O:I'
+        list_type = ['N', 'M', 'S', 'D']
+        for i in range(len(list_type)):
+            if list_type[i] == type_sort[2]:
+                if trend_sort[2] == 'D':
+                    f_val.sort(key = lambda x:x[i], reverse = True)
+                else:
+                    f_val.sort(key = lambda x:x[i])
     result = '<html><head><meta charset="utf-8"/><title>' + name_directory + '</title></head><body><h2>' + name_directory +'</h2><table><tbody><tr><th valign="top"></th>'
-    result += '<th><a href="' + name_directory + '">Name</a></th>'
-    result += '<th><a href="' + name_directory + '">Last modified</a></th>'
-    result += '<th><a href="' + name_directory + '">Size</a></th>'
-    result += '<th><a href="' + name_directory + '">Description</a></th></tr>'
+    result += '<th><a href="' + getDomain() + name_directory + '/?Sort=1;C=N;' + next_sort + '">Name</a></th>'
+    result += '<th><a href="' + getDomain() + name_directory + '/?Sort=1;C=M;' + next_sort + '">Last modified</a></th>'
+    result += '<th><a href="' + getDomain() + name_directory + '/?Sort=1;C=S;' + next_sort + '">Size</a></th>'
+    result += '<th><a href="' + getDomain() + name_directory + '/?Sort=1;C=D;' + next_sort + '">Description</a></th></tr>'
     result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="' + getDomain() + 'back.gif" alt="[PARENTDIR]"></td>'
     result += '<td><a href="' + getDomain() + parent_directory + '"' + 'target=_top' + '>Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
-    for f in files:
-      path_file = name_directory + '/' + f    # files/a.txt
-      print(path_file)
-      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(name_directory + '/' + f)))
-      sizes = convert_size(os.path.getsize(name_directory + '/' + f))
-      result += '<tr><td valign="top"><img src="' + getDomain() + 'compressed.gif" alt="[   ]"></td><td><a href="' + getDomain() + path_file + '">' + f + '</a>  </td><td align="right">'
+    
+    for i in range(len(f_val)):
+      path_file = name_directory + '/' + f_val[i][0]  # files/a.txt
+      times = f_val[i][1]#time.strftime('%Y-%m-%d %H:%M', f_val[i][1])
+      sizes = convert_size(f_val[i][2])
+      result += '<tr><td valign="top"><img src="' + getDomain() + 'compressed.gif" alt="[   ]"></td><td><a href="' + getDomain() + path_file + '">' + f_val[i][0] + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
     result += '<tr><th colspan="5"><hr></th></tr></tbody></table><iframe id="nr-ext-rsicon" style="position: absolute; display: none; width: 50px; height: 50px; z-index: 2147483647; border-style: none; background: transparent"></iframe></form></body></html>'
@@ -59,7 +80,7 @@ def directory_files(path_directory):
 def download_file(path_file): # path_file: /files/a.txt or /files/abc
     path_file = unquote(path_file)[1:]
     print(path_file)
-    if os.path.isdir(path_file):
+    if os.path.isdir(path_file) or "Sort=1" in path_file:
         content = directory_files('/' + path_file)
         mime_type = 'text/plain'
         return content.encode('utf-8'), mime_type.encode('utf-8'), path_file, 0, 1
