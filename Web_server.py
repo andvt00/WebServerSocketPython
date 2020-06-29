@@ -7,8 +7,8 @@ import sys
 import mimetypes
 from urllib.parse import unquote
 
-HOST = '127.0.109.168'
-PORT = 8080
+HOST = '0.0.0.0'
+PORT = 80
 sr = 'ServerRoot'
 accessInfo = False
 def response_ok(body=b"This is a minimal response", mimetype=b"text/plain", length=0, name='Noname'):
@@ -36,11 +36,9 @@ def directory_files(path_directory):
     name_directory = path_directory[1:]  # files/.../
     real_path_directory = sr + path_directory
     files = os.listdir(real_path_directory)
-    if (name_directory == 'files/'):
-      parent_directory = 'files/'
-    else :
-      val = name_directory.rsplit('/', 3)
-      parent_directory = '0' + val[0] + '/'  # file/
+    val = name_directory.rsplit('/')
+    print(val)
+    parent_directory = val[-1] + '/'  # file/
     result = '<html><head><meta charset="utf-8"/><title>' + name_directory + '</title></head><body><h2>' + name_directory +'</h2><table><tbody><tr><th valign="top"></th>'
     result += '<th><a href="' + name_directory + '">Name</a></th>'
     result += '<th><a href="' + name_directory + '">Last modified</a></th>'
@@ -49,10 +47,10 @@ def directory_files(path_directory):
     result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="back.gif" alt="[PARENTDIR]"></td>'
     result += '<td><a href="' + parent_directory + '">Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
     for f in files:
-      path_file = name_directory + f    # files/a.txt
+      path_file = val[-2] + '/' + f    # files/a.txt
       print(path_file)
-      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(sr + '/' + path_file)))
-      sizes = convert_size(os.path.getsize(sr + '/' + path_file))
+      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(os.path.getmtime(real_path_directory + '/' + f)))
+      sizes = convert_size(os.path.getsize(real_path_directory + '/' + f))
       result += '<tr><td valign="top"><img src="compressed.gif" alt="[   ]"></td><td><a href="' + path_file + '">' + f + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
@@ -134,14 +132,13 @@ def openSR(url, conn): #Send file on ServerRoot folder
     
 def ConnHandler(conn, addr):
     data = conn.recv(1024).decode('utf-8')
-    print("Recieved Request:\n")
-    print(data)
     if not data:
         conn.close()
         return
+    print("Recieved Request:\n")
+    print(data)
     parsed_fields = {}
     parsed_fields = parse_header(data)
-    print(parsed_fields['Path'])
     req_file = ''
     global accessInfo
     if parsed_fields['Method'] == 'POST':
