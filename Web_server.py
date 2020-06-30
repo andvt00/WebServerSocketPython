@@ -7,7 +7,7 @@ import sys
 import mimetypes
 from urllib.parse import unquote
 
-HOST = '192.168.43.33'
+HOST = 'localhost'
 PORT = 80
 sr = 'ServerRoot'
 accessInfo = False
@@ -44,6 +44,11 @@ def getFolderSize(folder):
             total_size += getFolderSize(itempath)
     return total_size
 
+def getSize(path):
+    if os.path.isdir(path):
+        return getFolderSize(path)
+    return(os.path.getsize(path))
+    
 #Path_directory Ex: /files/
 def directory_files(path_directory):
     name_directory = path_directory[1:]  # files/.../
@@ -54,7 +59,7 @@ def directory_files(path_directory):
         name_directory = path_directory[1:-16]
     files = os.listdir(name_directory)
     # Create list of tuple to sort
-    f_val = [(f, os.path.getmtime(name_directory+'/' + f), os.path.getsize(name_directory + '/'+f), f) for f in files]
+    f_val = [(f, os.path.getmtime(name_directory+'/' + f), getSize(name_directory + '/'+f), f) for f in files]
     pos = name_directory.rfind('/')
     parent_directory = ''
     if pos != -1:
@@ -81,12 +86,11 @@ def directory_files(path_directory):
     
     for i in range(len(f_val)):
       path_file = name_directory + '/' + f_val[i][0]  # files/a.txt
-      icon = 'file.gif'    	
-      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(f_val[i][1]))
-      sizes = convert_size(f_val[i][2])
+      icon = 'file.gif'
       if (os.path.isdir(path_file)):
       	icon = 'folder.gif'
-      	sizes = convert_size(getFolderSize(path_file))
+      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(f_val[i][1]))
+      sizes = convert_size(f_val[i][2])
       result += '<tr><td valign="top"><img src="' + getDomain() + icon + '" alt="[   ]"></td><td><a href="' + getDomain() + path_file + '">' + f_val[i][0] + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
@@ -174,10 +178,15 @@ def ConnHandler(conn, addr):
     req_file = ''
     global accessInfo
     if parsed_fields['Method'] == 'POST':
-        if parsed_fields['Path'] == '/info.html' and parsed_fields['Data'] == 'uname=admin&psw=admin':
-            accessInfo = True
-            reDirect('/info.html', conn)
-            return
+        if parsed_fields['Path'] == '/info.html':
+            if parsed_fields['Data'] == 'uname=admin&psw=admin':
+                accessInfo = True
+                reDirect('/info.html', conn)
+                return
+            else:
+                accessInfo = False
+                reDirect('/404.html', conn)
+                return
     if parsed_fields['Method'] == 'GET':
         if len(parsed_fields['Path'])==1:
             reDirect('/index.html', conn)
