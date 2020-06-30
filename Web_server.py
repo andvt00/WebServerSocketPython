@@ -33,6 +33,17 @@ def convert_size(size_bytes):
 
 def getDomain():
     return 'http://'+HOST+':'+str(PORT)+'/'
+
+def getFolderSize(folder):
+    total_size = os.path.getsize(folder)
+    for item in os.listdir(folder):
+        itempath = os.path.join(folder, item)
+        if os.path.isfile(itempath):
+            total_size += os.path.getsize(itempath)
+        elif os.path.isdir(itempath):
+            total_size += getFolderSize(itempath)
+    return total_size
+
 #Path_directory Ex: /files/
 def directory_files(path_directory):
     name_directory = path_directory[1:]  # files/.../
@@ -70,12 +81,12 @@ def directory_files(path_directory):
     
     for i in range(len(f_val)):
       path_file = name_directory + '/' + f_val[i][0]  # files/a.txt
-      icon = 'file.gif'
-      if (os.path.isdir(path_file)):
-      	icon = 'folder.gif'
-      value = float(f_val[i][1])
+      icon = 'file.gif'    	
       times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(f_val[i][1]))
       sizes = convert_size(f_val[i][2])
+      if (os.path.isdir(path_file)):
+      	icon = 'folder.gif'
+      	sizes = convert_size(getFolderSize(path_file))
       result += '<tr><td valign="top"><img src="' + getDomain() + icon + '" alt="[   ]"></td><td><a href="' + getDomain() + path_file + '">' + f_val[i][0] + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
