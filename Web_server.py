@@ -7,7 +7,7 @@ import sys
 import mimetypes
 from urllib.parse import unquote
 
-HOST = 'localhost'
+HOST = '127.0.109.168'
 PORT = 8080
 sr = 'ServerRoot'
 accessInfo = False
@@ -44,11 +44,9 @@ def directory_files(path_directory):
     files = os.listdir(name_directory)
     # Create list of tuple to sort
     f_val = [(f, os.path.getmtime(name_directory+'/' + f), os.path.getsize(name_directory + '/'+f), f) for f in files]
-    print(f_val)
     parent_directory = name_directory[:name_directory.rfind('/')]
     if sortable:
         require = path_directory[(len(path_directory)-7):].split(';') # C=*;O=*
-        print(require)
         type_sort, trend_sort = require[0], require[1]
         if trend_sort == next_sort:
             next_sort = 'O:I'
@@ -69,9 +67,13 @@ def directory_files(path_directory):
     
     for i in range(len(f_val)):
       path_file = name_directory + '/' + f_val[i][0]  # files/a.txt
-      times = f_val[i][1]#time.strftime('%Y-%m-%d %H:%M', f_val[i][1])
+      icon = 'file.gif'
+      if (os.path.isdir(path_file)):
+      	icon = 'folder.gif'
+      value = float(f_val[i][1])
+      times = time.strftime('%Y-%m-%d %H:%M', time.gmtime(f_val[i][1]))
       sizes = convert_size(f_val[i][2])
-      result += '<tr><td valign="top"><img src="' + getDomain() + 'compressed.gif" alt="[   ]"></td><td><a href="' + getDomain() + path_file + '">' + f_val[i][0] + '</a>  </td><td align="right">'
+      result += '<tr><td valign="top"><img src="' + getDomain() + icon + '" alt="[   ]"></td><td><a href="' + getDomain() + path_file + '">' + f_val[i][0] + '</a>  </td><td align="right">'
       result += str(times) + '</td><td align="right">'
       result += str(sizes) + '</td><td>&nbsp;</td></tr>'
     result += '<tr><th colspan="5"><hr></th></tr></tbody></table><iframe id="nr-ext-rsicon" style="position: absolute; display: none; width: 50px; height: 50px; z-index: 2147483647; border-style: none; background: transparent"></iframe></form></body></html>'
