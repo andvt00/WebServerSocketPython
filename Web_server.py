@@ -7,8 +7,8 @@ import sys
 import mimetypes
 from urllib.parse import unquote
 
-HOST = '127.0.109.168'
-PORT = 8080
+HOST = '192.168.43.33'
+PORT = 80
 sr = 'ServerRoot'
 accessInfo = False
 def response_ok(body=b"This is a minimal response", mimetype=b"text/plain", length=0, name='Noname'):
@@ -16,7 +16,7 @@ def response_ok(body=b"This is a minimal response", mimetype=b"text/plain", leng
         b"HTTP/1.1 200 OK",
         b"accept-ranges: bytes",
         b"Content-Disposition: inline; filename=" + name,
-        b"content-length: " + str(length).encode('utf-8'),
+        #b"content-length: " + str(length).encode('utf-8'),
         b"Content-Type: " + mimetype,
         b"",
         body,
@@ -44,7 +44,10 @@ def directory_files(path_directory):
     files = os.listdir(name_directory)
     # Create list of tuple to sort
     f_val = [(f, os.path.getmtime(name_directory+'/' + f), os.path.getsize(name_directory + '/'+f), f) for f in files]
-    parent_directory = name_directory[:name_directory.rfind('/')]
+    pos = name_directory.rfind('/')
+    parent_directory = ''
+    if pos != -1:
+        parent_directory = name_directory[:name_directory.rfind('/')]
     if sortable:
         require = path_directory[(len(path_directory)-7):].split(';') # C=*;O=*
         type_sort, trend_sort = require[0], require[1]
@@ -219,8 +222,9 @@ except socket.error:
 s.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 try:
     s.bind((HOST,PORT))
-except socket.error:
-    print("Error while binding host")
+except socket.error as e:
+    print("Error while binding host:")
+    print(e)
     sys.exit()
 print("Socket bind successful")
 print('Serving on http://'+HOST+':'+str(PORT))
