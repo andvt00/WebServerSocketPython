@@ -82,7 +82,7 @@ def directory_files(path_directory):
     result += '<th><a href="' + getDomain() + name_directory + '/?Sort=1;C=S;' + next_sort + '">Size</a></th>'
     result += '<th><a href="' + getDomain() + name_directory + '/?Sort=1;C=D;' + next_sort + '">Description</a></th></tr>'
     result += '<tr><th colspan="5"><hr></th></tr><tr><td valign="top"><img src="' + getDomain() + 'back.gif" alt="[PARENTDIR]"></td>'
-    result += '<td><a href="' + getDomain() + parent_directory + '"' + 'target=_top' + '>Parent Directory</a></td><td>&nbsp;</td><td align="right">  - </td><td>&nbsp;</td></tr>'
+    result += '<td><a href="' + getDomain() + parent_directory + '">Parent Directory</a></td><td>&nbsp;</td><td align="right">   </td><td>&nbsp;</td></tr>'
     
     for i in range(len(f_val)):
       path_file = name_directory + '/' + f_val[i][0]  # files/a.txt
