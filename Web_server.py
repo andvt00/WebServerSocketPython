@@ -153,7 +153,7 @@ def parse_header(data):
     return d_words
       
 def reDirect(url, conn):
-    response_header = 'HTTP/1.1 301 Moved Permanently\nLocation: '+ url + '\nConnection: Keep-Alive\nContent-length: 0\n\n'
+    response_header = 'HTTP/1.1 301 Permanently\nLocation: '+ url + '\nConnection: close\nContent-length: 0\n\n'
     conn.sendall(response_header.encode('utf-8'))
     conn.close()
 
@@ -182,21 +182,18 @@ def ConnHandler(conn, addr):
             if parsed_fields['Data'] == 'uname=admin&psw=admin':
                 accessInfo = True
                 reDirect('/info.html', conn)
-                return
             else:
                 accessInfo = False
                 reDirect('/404.html', conn)
-                return
+            return
     if parsed_fields['Method'] == 'GET':
         if len(parsed_fields['Path'])==1:
             reDirect('/index.html', conn)
             return
         elif parsed_fields['Path'] == '/info.html':
-            if accessInfo:
-                openSR('/info.html', conn)
-            else:
+            if not accessInfo:
                 reDirect('/404.html', conn)
-            return
+                return
         elif parsed_fields['Path'] == '/files.html':
           sock = ("HTTP/1.1 200 OK\r\n\r\n").encode('utf-8')
           sock += directory_files('/files').encode('utf-8')
@@ -248,7 +245,7 @@ except socket.error as e:
     sys.exit()
 print("Socket bind successful")
 print('Serving on http://'+HOST+':'+str(PORT))
-s.listen(3)
+s.listen(10)
 print("Socket is now listening, ready for connections")
 while True:
    conn,addr = s.accept()
