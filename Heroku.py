@@ -10,6 +10,7 @@ from urllib.parse import unquote
 HOST = '0.0.0.0'
 PORT = int(os.environ['PORT'])
 sr = 'ServerRoot'
+nameApp = 'socket-hcmus'
 accessInfo = False
 def response_ok(body=b"This is a minimal response", mimetype=b"text/plain", length=0, name='Noname'):
     return b"\r\n".join([
@@ -32,7 +33,7 @@ def convert_size(size_bytes):
    return "%s%s" % (s, size_name[i])
 
 def getDomain():
-    return 'http://socket-hcmus.herokuapp.com/'
+    return 'http://' + nameApp + '.herokuapp.com/'
 
 def getFolderSize(folder):
     total_size = os.path.getsize(folder)
@@ -167,18 +168,22 @@ def reDirect(url, conn):
     conn.close()
     
 def ConnHandler(conn, addr):
-    data = conn.recv(1500).decode('utf-8')
+    data = conn.recv(4096)
+    cl = int(parse_header(data.decode('utf-8'))['Content-Length'])
+    if (data.find(b'\r\n\r\n')+4==len(data)) and cl > 0:
+        data+=conn.recv(int(parse_header(data.decode('utf-8'))['Content-Length']))
     if not data:
         conn.close()
         return
     print("Recieved Request:\n")
+    print(data)
     parsed_fields = {}
-    parsed_fields = parse_header(data)
+    parsed_fields = parse_header(data.decode('utf-8'))
     print(parsed_fields)
     req_file = ''
     global accessInfo
     if parsed_fields['Method'] == 'POST':
-        if parsed_fields['Data'] == 'uname=admin&psw=admin' or (parsed_fields['Data'] == '' and parsed_fields['Content-Length']=='21'):#Body can lost if use POST
+        if parsed_fields['Data'] == 'uname=admin&psw=admin':
             accessInfo = True
             reDirect('info.html', conn)
         else:
@@ -244,7 +249,7 @@ except socket.error as e:
     sys.exit()
 print("Socket bind successful")
 print('Serving on http://'+HOST+':'+str(PORT))
-s.listen(5)
+s.listen(10)
 print("Socket is now listening, ready for connections")
 while True:
    conn,addr = s.accept()
