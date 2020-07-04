@@ -1,1 +1,0 @@
-web: python Web_server.py runserver 0.0.0.0:80
