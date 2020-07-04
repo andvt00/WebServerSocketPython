@@ -6,6 +6,10 @@ Create Web Server use socket python
 python Web_server.py
 ```
 # Deloy to Heroku
+```python
+Heroku.py
+nameApp={Name your herokuapp}
+```
 ```bash
 git clone https://github.com/thanhan17/WebServerSocketPython.git
 cd WebServerSocketPython
@@ -14,6 +18,7 @@ git init
 git add .
 git commit -m "Ready to deploy"
 git push heroku master
+heroku open
 ```
 # DEMO
 [SOCKET-HCMUS](http://socket-hcmus.herokuapp.com/)
