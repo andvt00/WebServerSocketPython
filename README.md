@@ -22,3 +22,7 @@ heroku open
 ```
 # DEMO
 [SOCKET-HCMUS](http://socket-hcmus.herokuapp.com/)
+
+# AUTHOR
+Nguyễn Đại Dương - 18120168 - HCMUS
+Đoàn Văn Thanh An -18120109 - HCMUS
